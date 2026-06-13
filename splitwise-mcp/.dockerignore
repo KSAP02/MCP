@@ -1,0 +1,19 @@
+# Python caches / build artifacts
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Local virtualenv — never copy into the image
+splitwise-mcp-venv/
+**/.venv/
+
+# Secrets/config are injected at runtime via env_file, not baked into images
+.env
+**/.env
+
+# VCS / editor / docs not needed in the image
+.git/
+.gitignore
+.claude/
+README.md
+CLAUDE.md

@@ -1,0 +1,45 @@
+# Run both services together:  docker compose up --build
+#
+# backend      -> http://localhost:8001  (FastAPI, /docs for the API explorer)
+# mcp-server   -> http://localhost:8080  (MCP, /mcp endpoint)
+#
+# Secrets/config come from the root .env (SPLITWISE_API_KEY etc.); the
+# `environment:` blocks below override the bind hosts for containers.
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: splitwise-backend
+    env_file: .env
+    environment:
+      BACKEND_HOST: 0.0.0.0
+      BACKEND_PORT: 8001
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: mcp-server/Dockerfile
+    container_name: splitwise-mcp-server
+    env_file: .env
+    environment:
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: 8080
+      # Reach the backend by its service name on the compose network.
+      BACKEND_URL: http://backend:8001
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

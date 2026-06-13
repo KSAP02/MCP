@@ -1,3 +1,5 @@
 .env
 splitwise-mcp-venv/
 .claude/
+openapi.json
+__pycache__/
